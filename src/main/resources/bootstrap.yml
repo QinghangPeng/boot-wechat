@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: basic-wechat
+  profiles:
+    active: dev
+server:
+  port: ${server-port:9006}
