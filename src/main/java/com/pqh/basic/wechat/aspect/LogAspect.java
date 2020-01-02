@@ -1,6 +1,7 @@
 package com.pqh.basic.wechat.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.pqh.basic.wechat.vo.FileUploadInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -13,8 +14,13 @@ import org.springframework.util.StopWatch;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author lufy
@@ -33,13 +39,18 @@ public class LogAspect {
     @Value("${spring.application.name}")
     private String application;
 
-    @Pointcut("execution(public * com.metro.nccc..*.controller..*(..))")
+    @Pointcut("execution(public * com.pqh.basic..*.controller..*(..))")
     public void declearJoinPointExpression() {
     }
 
     @Around(value = "declearJoinPointExpression()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        String args = JSON.toJSONString(joinPoint.getArgs());
+        Object[] argss = joinPoint.getArgs();
+        //过滤掉HttpServletRequest、HttpServletResponse、MultipartFile、byte[]
+        List<Object> collect = Stream.of(argss).filter(arg -> (!(arg instanceof HttpServletRequest)
+                && !(arg instanceof HttpServletResponse) && !(arg instanceof MultipartFile)
+                && !(arg instanceof FileUploadInfo))).collect(Collectors.toList());
+        String args = JSON.toJSONString(collect);
         try {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();

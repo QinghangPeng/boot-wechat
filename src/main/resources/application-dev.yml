@@ -35,6 +35,11 @@ spring:
         url: ${nccc_admin_monitor:http://localhost:9020}
         instance:
           prefer-ip: true
+  servlet:
+    multipart:
+      # 文件上传限制500M
+      max-file-size: 5242880000
+      max-request-size: 5242880000
 
 logstrategy:
   request: true
@@ -44,9 +49,9 @@ logging:
 ### Ribbon 配置
 ribbon:
   # 连接超时
-  ConnectTimeout: 5000
+  ConnectTimeout: 50000
   # 响应超时
-  ReadTimeout: 15000
+  ReadTimeout: 50000
 ### Feign 配置
 feign:
   # 开启断路器（熔断器）
@@ -65,7 +70,7 @@ hystrix:
         requestVolumeThreshold: 1
         # 触发短路的时间值，当该值设为5000时，则当触发 circuit break 后的5000毫秒内都会拒绝request
         # 也就是5000毫秒后才会关闭circuit。默认5000
-        sleepWindowInMilliseconds: 5000
+        sleepWindowInMilliseconds: 50000
         # 强制打开熔断器，如果打开这个开关，那么拒绝所有request，默认false
         forceOpen: false
         # 强制关闭熔断器 如果这个开关打开，circuit将一直关闭且忽略，默认false
@@ -74,4 +79,4 @@ hystrix:
         isolation:
           thread:
             # 熔断器超时时间，默认：1000/毫秒
-            timeoutInMilliseconds: 5000
+            timeoutInMilliseconds: 50000
