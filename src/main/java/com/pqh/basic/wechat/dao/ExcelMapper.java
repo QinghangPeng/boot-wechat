@@ -1,5 +1,6 @@
 package com.pqh.basic.wechat.dao;
 
+import com.pqh.basic.wechat.po.StationPO;
 import com.pqh.basic.wechat.vo.excelvo.BusLineVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,4 +20,6 @@ public interface ExcelMapper {
     void insertExcel(List<BusLineVO> list);
 
     String queryCodeByName(@Param("busLineCode") String busLineCode);
+
+    StationPO queryStationByName(@Param("stationName") String stationName);
 }

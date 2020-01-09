@@ -2,12 +2,14 @@ package com.pqh.basic.wechat.service;
 
 import com.pqh.basic.wechat.dao.ExcelMapper;
 import com.pqh.basic.wechat.error.ServiceError;
+import com.pqh.basic.wechat.po.StationPO;
 import com.pqh.basic.wechat.response.RestResponse;
 import com.pqh.basic.wechat.util.ExcelImportUtil;
 import com.pqh.basic.wechat.util.RestClientHelper;
 import com.pqh.basic.wechat.vo.excelvo.BusLineVO;
 import com.pqh.basic.wechat.vo.excelvo.BusStationVO;
 import com.pqh.basic.wechat.vo.excelvo.MetroLineStaionVO;
+import com.pqh.basic.wechat.vo.excelvo.QingWuInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -44,7 +46,8 @@ public class ExcelService {
         try{
 //            buildBusLine(excel);
 //            buildBusStation(excel);
-            buildMetroAnBao(excel);
+//            buildMetroAnBao(excel);
+            buildQwPower(excel);
             return RestResponse.success();
         } catch(Exception e) {
             log.error("readExcel error:{}",e);
@@ -52,6 +55,41 @@ public class ExcelService {
         }
     }
 
+    private void buildQwPower(MultipartFile excel) throws Exception{
+        List<QingWuInfoVO> list = ExcelImportUtil.readExcel(excel.getInputStream(),QingWuInfoVO.class);
+        for (QingWuInfoVO q : list) {
+            String stationName = q.getStationName();
+            if (stationName.contains("T1航站楼")) {
+                stationName = "双流机场1航站楼";
+            }
+            if (stationName.contains("T2航站楼")) {
+                stationName = "双流机场2航站楼";
+            }
+            String lastWord = stationName.substring(stationName.length() - 1,stationName.length());
+            if (lastWord.equals("站")) {
+                stationName = stationName.substring(0,stationName.length() - 1);
+            }
+            log.info("当前的车站:{}",stationName);
+            StationPO stationPO = mapper.queryStationByName(stationName);
+            String lineCode = stationPO.getLineCode();
+            String code = stationPO.getStationCode();
+            if (lineCode.equals("10")) {
+                code = qhdm + "0" + lineCode + "A" + code.substring(2);
+                q.setStationCode(code);
+            } else {
+                code = qhdm + "0" + lineCode + code.substring(1);
+                q.setStationCode(code);
+            }
+        }
+        File file = new File("/home/stealhao/下载/勤务人员信息测试.xlsx");
+        ExcelImportUtil.writeExcel(file,list);
+    }
+
+    /**
+     *  地铁安保人员信息
+     * @param excel
+     * @throws Exception
+     */
     private void buildMetroAnBao(MultipartFile excel) throws Exception{
         List<MetroLineStaionVO> list = ExcelImportUtil.readExcel(excel.getInputStream(),MetroLineStaionVO.class);
         for (MetroLineStaionVO m : list) {

@@ -16,4 +16,11 @@
         where gjxlmc = #{busLineCode}
     </select>
 
+    <select id="queryStationByName" resultType="com.pqh.basic.wechat.po.StationPO">
+        select line_code as lineCode,station_code as stationCode
+        from t_cdmetro_station
+        where station_name like CONCAT('%',#{stationName},'%') or diagram_station like CONCAT('%',#{stationName},'%')
+        limit 1
+    </select>
+
 </mapper>
