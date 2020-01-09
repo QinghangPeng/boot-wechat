@@ -5,3 +5,6 @@ spring:
     active: dev
 server:
   port: ${server-port:9006}
+mybatis:
+  #  config-location: classpath:mybatis/config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml

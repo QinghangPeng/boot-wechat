@@ -15,6 +15,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -45,7 +48,6 @@ public class FileManageService {
             byte[][] bytes = splitBytes(file.getBytes(), 1024 * 1024 * 50);
             info.setFileBytes(bytes);*/
 //            info.setFileStream(file.getInputStream());
-
             RestResponse<FileUploadVO> response = feign.create(code,file);
             FileUploadVO restData = RestClientHelper.getRestData(response);
             return RestResponse.success(restData);
@@ -53,6 +55,19 @@ public class FileManageService {
             log.error("upload file error:{}",e);
             return RestResponse.error(ServiceError.UN_KNOW_NULL);
         }
+    }
+
+    public List<byte[]> toByteArray(InputStream input) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        List<byte[]> list = new ArrayList<>();
+        byte[] buffer = new byte[61858764];
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            list.add(output.toByteArray());
+        }
+
+        return list;
     }
 
     /**

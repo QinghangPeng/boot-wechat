@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pqh.basic.wechat.dao.ExcelMapper">
+
+    <insert id="insertExcel" parameterType="com.pqh.basic.wechat.vo.excelvo.BusLineVO">
+        insert into t_busline_info (id,gjxlbm,gjxlmc)
+        values
+        <foreach collection="list" item="line" separator=",">
+            (#{line.id},#{line.gjxlbm},#{line.gjxlmc})
+        </foreach>
+    </insert>
+
+    <select id="queryCodeByName" resultType="java.lang.String">
+        select gjxlbm
+        from t_busline_info
+        where gjxlmc = #{busLineCode}
+    </select>
+
+</mapper>

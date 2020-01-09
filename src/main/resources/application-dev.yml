@@ -1,4 +1,21 @@
 spring:
+  datasource:
+    url: ${pgsql_url:jdbc:postgresql://127.0.0.1:5432/basicinfo}
+    username: ${pgsql_username:postgres}
+    password: ${pgsql_password:postgres}
+    driver-class-name: org.postgresql.Driver
+    maxActive: 50
+    initialSize: 10
+    maxWait: 60000
+    minIdle: 6
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
   cloud:
     consul:
       host: ${consul_host:127.0.0.1}
