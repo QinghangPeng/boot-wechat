@@ -3,7 +3,9 @@ package com.pqh.basic.wechat.service;
 import com.pqh.basic.wechat.error.ServiceError;
 import com.pqh.basic.wechat.feign.FileManageFeign;
 import com.pqh.basic.wechat.response.RestResponse;
+import com.pqh.basic.wechat.util.RedisUtil;
 import com.pqh.basic.wechat.util.RestClientHelper;
+import com.pqh.basic.wechat.vo.BigFileUploadVO;
 import com.pqh.basic.wechat.vo.FileUploadInfo;
 import com.pqh.basic.wechat.vo.FileUploadVO;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 /**
  * @ClassName: FileManageService
@@ -37,6 +36,16 @@ public class FileManageService {
     @Autowired
     private FileManageFeign feign;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    /**
+     *  文件分块支持最大size 20M
+     */
+    private static final Long BLOCK_MAX_SIZE = 20971520L;
+
+    private static final String FILE_CHUNK_KEY = "file:chunk:";
+
     public RestResponse upload(String code, MultipartFile file) {
         try{
             /*FileUploadInfo info = new FileUploadInfo();
@@ -48,13 +57,49 @@ public class FileManageService {
             byte[][] bytes = splitBytes(file.getBytes(), 1024 * 1024 * 50);
             info.setFileBytes(bytes);*/
 //            info.setFileStream(file.getInputStream());
-            RestResponse<FileUploadVO> response = feign.create(code,file);
-            FileUploadVO restData = RestClientHelper.getRestData(response);
+            //调用redis分块存储
+            byte[][] bytes = splitBytes(file.getBytes(), BLOCK_MAX_SIZE.intValue());
+            Map<String,byte[]> map = new HashMap<>();
+            int k = 0;
+            for (byte[] chunk : bytes) {
+                map.put(k + "",chunk);
+                k++;
+            }
+            boolean b = redisUtil.hashSetAll(FILE_CHUNK_KEY + "testforbig", map);
+            FileUploadVO restData = new FileUploadVO();
+            if (b) {
+                BigFileUploadVO vo = new BigFileUploadVO();
+                vo.setChunkCounts(bytes.length);
+                vo.setEncryptCode(code);
+                vo.setFileSuffixName("mp4");
+                vo.setFileSize(52428800L);
+                vo.setFileCode("testforbig");
+                RestResponse<FileUploadVO> response = feign.createWithChunk(vo);
+                restData = RestClientHelper.getRestData(response);
+            }
+            /*RestResponse<FileUploadVO> response = feign.create(code,file);
+            FileUploadVO restData = RestClientHelper.getRestData(response);*/
+
             return RestResponse.success(restData);
         } catch(Exception e) {
             log.error("upload file error:{}",e);
             return RestResponse.error(ServiceError.UN_KNOW_NULL);
         }
+    }
+
+    private static byte[] byteMergerAll(byte[]... values) {
+        int length_byte = 0;
+        for (int i = 0; i < values.length; i++) {
+            length_byte += values[i].length;
+        }
+        byte[] all_byte = new byte[length_byte];
+        int countLength = 0;
+        for (int i = 0; i < values.length; i++) {
+            byte[] b = values[i];
+            System.arraycopy(b, 0, all_byte, countLength, b.length);
+            countLength += b.length;
+        }
+        return all_byte;
     }
 
     public List<byte[]> toByteArray(InputStream input) throws IOException {

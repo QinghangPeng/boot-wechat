@@ -3,6 +3,7 @@ package com.pqh.basic.wechat.feign.fallback;
 import com.pqh.basic.wechat.error.ServiceError;
 import com.pqh.basic.wechat.feign.FileManageFeign;
 import com.pqh.basic.wechat.response.RestResponse;
+import com.pqh.basic.wechat.vo.BigFileUploadVO;
 import com.pqh.basic.wechat.vo.FileUploadInfo;
 import com.pqh.basic.wechat.vo.FileUploadVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,11 @@ public class FileManageFeignFallBack implements FileManageFeign {
 
     @Override
     public RestResponse<FileUploadVO> create(String code, MultipartFile file) {
+        return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
+    }
+
+    @Override
+    public RestResponse<FileUploadVO> createWithChunk(@Valid BigFileUploadVO bigFile) {
         return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
     }
 

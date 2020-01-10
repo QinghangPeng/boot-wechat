@@ -3,6 +3,7 @@ package com.pqh.basic.wechat.feign;
 import com.pqh.basic.wechat.feign.fallback.BasicDataFeignFallBack;
 import com.pqh.basic.wechat.feign.fallback.FileManageFeignFallBack;
 import com.pqh.basic.wechat.response.RestResponse;
+import com.pqh.basic.wechat.vo.BigFileUploadVO;
 import com.pqh.basic.wechat.vo.FileUploadInfo;
 import com.pqh.basic.wechat.vo.FileUploadVO;
 import feign.codec.Encoder;
@@ -38,6 +39,9 @@ public interface FileManageFeign {
 
     @PostMapping(value = "/file_manages/upload/{code}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     RestResponse<FileUploadVO> create(@PathVariable("code") String code, @RequestPart("file") MultipartFile file);
+
+    @PostMapping(path = "/file_manages/chunk/upload")
+    RestResponse<FileUploadVO> createWithChunk(@Valid @RequestBody BigFileUploadVO bigFile);
 
     @Configuration
     class MultipartSupportConfig {
