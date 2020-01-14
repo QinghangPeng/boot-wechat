@@ -40,7 +40,7 @@ public class FileManageService {
     private RedisUtil redisUtil;
 
     /**
-     *  文件分块支持最大size 20M
+     *  文件分块支持最大size 1M
      */
     private static final Long BLOCK_MAX_SIZE = 20971520L;
 
@@ -65,7 +65,9 @@ public class FileManageService {
                 map.put(k + "",chunk);
                 k++;
             }
-            boolean b = redisUtil.hashSetAll(FILE_CHUNK_KEY + "testforbig", map);
+            boolean b = redisUtil.hashSetAll(FILE_CHUNK_KEY + "9f70ee4529d4761463b298dfe2a0dc30", map);
+            int count = redisUtil.hashSize(FILE_CHUNK_KEY + "9f70ee4529d4761463b298dfe2a0dc30");
+            log.info("chunk count = {}",count);
             FileUploadVO restData = new FileUploadVO();
             if (b) {
                 BigFileUploadVO vo = new BigFileUploadVO();
@@ -73,7 +75,7 @@ public class FileManageService {
                 vo.setEncryptCode(code);
                 vo.setFileSuffixName("mp4");
                 vo.setFileSize(52428800L);
-                vo.setFileCode("testforbig");
+                vo.setFileCode("9f70ee4529d4761463b298dfe2a0dc30");
                 RestResponse<FileUploadVO> response = feign.createWithChunk(vo);
                 restData = RestClientHelper.getRestData(response);
             }
@@ -137,5 +139,16 @@ public class FileManageService {
             result[i] = Arrays.copyOfRange(bytes, from, to);
         }
         return result;
+    }
+
+    public RestResponse getSize(String key) {
+        try{
+            int count = redisUtil.hashSize(FILE_CHUNK_KEY + key);
+            log.info("chunk count = {}",count);
+            return RestResponse.success();
+        } catch(Exception e) {
+            log.error("getSize error:{}",e);
+            return RestResponse.error(ServiceError.UN_KNOW_NULL);
+        }
     }
 }

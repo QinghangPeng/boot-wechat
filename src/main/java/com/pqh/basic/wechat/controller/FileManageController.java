@@ -27,4 +27,10 @@ public class FileManageController {
     public RestResponse upload(@PathVariable String code, @RequestParam("file") MultipartFile file) {
         return service.upload(code,file);
     }
+
+    @ApiOperation("测试文件上传分块数量")
+    @GetMapping("/file_upload/{key}")
+    public RestResponse getSize(@PathVariable String key) {
+        return service.getSize(key);
+    }
 }

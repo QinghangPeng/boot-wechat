@@ -93,6 +93,14 @@ public class RedisUtil {
         }
     }
 
+    public int hashSize(String key) {
+        try{
+            return key == null ? 0 : redisTemplate.opsForHash().size(key).intValue();
+        } catch(Exception e) {
+            throw e;
+        }
+    }
+
     /**
      *  设置hash缓存
      * @param key
