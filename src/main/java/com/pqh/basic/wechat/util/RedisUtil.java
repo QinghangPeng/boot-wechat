@@ -108,7 +108,7 @@ public class RedisUtil {
      * @param value
      * @return
      */
-    public boolean hashSet(String key,Object valueKey,Object value) {
+    public boolean hashSet(String key,String valueKey,Object value) {
         try{
             redisTemplate.opsForHash().put(key,valueKey,value);
             return true;
@@ -125,7 +125,7 @@ public class RedisUtil {
      * @param time  单位为分钟
      * @return
      */
-    public boolean hashSet(String key,Object valueKey,Object value,long time) {
+    public boolean hashSet(String key,String valueKey,Object value,long time) {
         try{
             if (time > 0) {
                 redisTemplate.opsForHash().put(key,valueKey,value);

@@ -46,7 +46,7 @@ public class FileManageService {
 
     private static final String FILE_CHUNK_KEY = "file:chunk:";
 
-    public RestResponse upload(String code, MultipartFile file) {
+    public RestResponse upload(String code, MultipartFile file,String fileMd5) {
         try{
             /*FileUploadInfo info = new FileUploadInfo();
             info.setEncryptCode(code);
@@ -62,23 +62,25 @@ public class FileManageService {
             Map<String,byte[]> map = new HashMap<>();
             int k = 0;
             for (byte[] chunk : bytes) {
-                map.put(k + "",chunk);
+//                map.put(k + "",chunk);
+                redisUtil.hashSet(FILE_CHUNK_KEY + fileMd5,String.valueOf(k),chunk,5);
                 k++;
             }
-            boolean b = redisUtil.hashSetAll(FILE_CHUNK_KEY + "9f70ee4529d4761463b298dfe2a0dc30", map);
-            int count = redisUtil.hashSize(FILE_CHUNK_KEY + "9f70ee4529d4761463b298dfe2a0dc30");
+//            boolean b = redisUtil.hashSetAll(FILE_CHUNK_KEY + "9f70ee4529d4761463b298dfe2a0dc30", map);
+            int count = redisUtil.hashSize(FILE_CHUNK_KEY + fileMd5);
             log.info("chunk count = {}",count);
             FileUploadVO restData = new FileUploadVO();
-            if (b) {
+            if (count == bytes.length) {
                 BigFileUploadVO vo = new BigFileUploadVO();
                 vo.setChunkCounts(bytes.length);
                 vo.setEncryptCode(code);
                 vo.setFileSuffixName("mp4");
                 vo.setFileSize(52428800L);
-                vo.setFileCode("9f70ee4529d4761463b298dfe2a0dc30");
+                vo.setFileCode(fileMd5);
                 RestResponse<FileUploadVO> response = feign.createWithChunk(vo);
                 restData = RestClientHelper.getRestData(response);
             }
+
             /*RestResponse<FileUploadVO> response = feign.create(code,file);
             FileUploadVO restData = RestClientHelper.getRestData(response);*/
 

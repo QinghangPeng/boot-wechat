@@ -23,9 +23,10 @@ public class FileManageController {
     private FileManageService service;
 
     @ApiOperation("测试文件上传")
-    @PostMapping("/file_upload/{code}")
-    public RestResponse upload(@PathVariable String code, @RequestParam("file") MultipartFile file) {
-        return service.upload(code,file);
+    @PostMapping("/file_upload")
+    public RestResponse upload(@RequestParam("code") String code, @RequestParam("file") MultipartFile file,
+                               @RequestParam("fileMd5") String fileMd5) {
+        return service.upload(code,file,fileMd5);
     }
 
     @ApiOperation("测试文件上传分块数量")
