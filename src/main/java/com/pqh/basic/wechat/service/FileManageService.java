@@ -6,8 +6,8 @@ import com.pqh.basic.wechat.response.RestResponse;
 import com.pqh.basic.wechat.util.RedisUtil;
 import com.pqh.basic.wechat.util.RestClientHelper;
 import com.pqh.basic.wechat.vo.BigFileUploadVO;
-import com.pqh.basic.wechat.vo.FileUploadInfo;
 import com.pqh.basic.wechat.vo.FileUploadVO;
+import com.pqh.basic.wechat.vo.FileVideoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +16,16 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @ClassName: FileManageService
@@ -152,5 +157,53 @@ public class FileManageService {
             log.error("getSize error:{}",e);
             return RestResponse.error(ServiceError.UN_KNOW_NULL);
         }
+    }
+
+    public void find(String fileId) {
+        try{
+            List<byte[]> list = new ArrayList<>();
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            log.info("开始调用远程服务：{}", LocalDateTime.now().format(format));
+            RestResponse<FileVideoVO> response = feign.findVideo(fileId,0);
+            FileVideoVO vo = RestClientHelper.getRestData(response);
+            list.add(vo.getChunkFile());
+            Integer chunkCount = vo.getChunkCount();
+            if (chunkCount > 1) {
+                for (int i = 1; i < chunkCount; i++) {
+                    RestResponse<FileVideoVO> otherResult = feign.findVideo(fileId,i);
+                    FileVideoVO vos = RestClientHelper.getRestData(otherResult);
+                    list.add(vos.getChunkFile());
+                }
+            }
+            log.info("结束调用远程服务：{}", LocalDateTime.now().format(format));
+            RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+            HttpServletResponse httpServletResponse = ((ServletRequestAttributes) attributes).getResponse();
+
+            httpServletResponse.reset();
+
+            httpServletResponse.setContentType("video/" + vo.getSName());
+            httpServletResponse.addHeader("Content-Disposition" ,"attachment;filename=\"" + URLEncoder.encode(vo.getFileName(), "UTF-8")+ "\"");
+            httpServletResponse.setContentLength(vo.getFileSize());
+            httpServletResponse.addHeader("Content-Range", "" + Integer.valueOf(vo.getFileSize() - 1));
+            httpServletResponse.addHeader("Accept-Ranges", "bytes");
+            httpServletResponse.addHeader("Etag", "W/\"9767057-1323779115364\"");
+            for (byte[] chunk : list) {
+                InputStream is = new ByteArrayInputStream(chunk);
+                int read = 0;
+                byte[] bytes = new byte[10485760];
+                while ((read = is.read(bytes)) != -1) {
+                    httpServletResponse.getOutputStream().write(bytes,0,read);
+                }
+                is.close();
+            }
+            if (list.size() > 1) {
+                log.info("大文件写出完毕============================");
+            }
+            httpServletResponse.getOutputStream().close();
+
+        } catch(Exception e) {
+            log.error("find video error:{}",e);
+        }
+
     }
 }
