@@ -3,10 +3,7 @@ package com.pqh.basic.wechat.feign.fallback;
 import com.pqh.basic.wechat.error.ServiceError;
 import com.pqh.basic.wechat.feign.FileManageFeign;
 import com.pqh.basic.wechat.response.RestResponse;
-import com.pqh.basic.wechat.vo.BigFileUploadVO;
-import com.pqh.basic.wechat.vo.FileUploadInfo;
-import com.pqh.basic.wechat.vo.FileUploadVO;
-import com.pqh.basic.wechat.vo.FileVideoVO;
+import com.pqh.basic.wechat.vo.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -38,6 +35,16 @@ public class FileManageFeignFallBack implements FileManageFeign {
 
     @Override
     public RestResponse<FileVideoVO> findVideo(String fileId, Integer chunkNum) {
+        return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
+    }
+
+    @Override
+    public RestResponse<FileVideoVO> findRangeVideo(String fileId,Long offset) {
+        return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
+    }
+
+    @Override
+    public RestResponse<VideoChunkVO> getvideo(String fileId, Integer offset, Integer chunkSize) {
         return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
     }
 

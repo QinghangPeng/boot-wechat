@@ -2,10 +2,7 @@ package com.pqh.basic.wechat.feign;
 
 import com.pqh.basic.wechat.feign.fallback.FileManageFeignFallBack;
 import com.pqh.basic.wechat.response.RestResponse;
-import com.pqh.basic.wechat.vo.BigFileUploadVO;
-import com.pqh.basic.wechat.vo.FileUploadInfo;
-import com.pqh.basic.wechat.vo.FileUploadVO;
-import com.pqh.basic.wechat.vo.FileVideoVO;
+import com.pqh.basic.wechat.vo.*;
 import feign.codec.Encoder;
 import feign.form.spring.SpringFormEncoder;
 import io.swagger.annotations.ApiParam;
@@ -30,7 +27,7 @@ import javax.validation.Valid;
  * @Date: 2019/12/31 下午4:31
  * @Version: v1.0
  */
-@FeignClient(value = "nccc-basic-file-manage",url = "http://10.253.100.11:32365/",fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
+@FeignClient(value = "nccc-basic-file-manage",/*url = "http://10.253.100.11:32365/",*/fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
 @Primary
 public interface FileManageFeign {
 
@@ -46,6 +43,21 @@ public interface FileManageFeign {
     @GetMapping("/file_manages/video")
     RestResponse<FileVideoVO> findVideo(@ApiParam("文件url") @RequestParam("fileId") String fileId,
                                         @ApiParam("第几片(从0片开始)") @RequestParam("chunkNum") Integer chunkNum);
+
+    /**
+     *  此代码废弃
+     * @param fileId
+     * @param offset
+     * @return
+     */
+    @GetMapping("/file_manages/range/video")
+    RestResponse<FileVideoVO> findRangeVideo(@ApiParam("文件url") @RequestParam("fileId") String fileId,
+                                        @ApiParam("文件分片起始点") @RequestParam("offset") Long offset);
+
+    @GetMapping("/file_manages/range/video")
+    RestResponse<VideoChunkVO> getvideo(@ApiParam("文件url") @RequestParam("fileId") String fileId,
+                                        @ApiParam("文件分片起始点") @RequestParam("offset") Integer offset,
+                                        @ApiParam("文件分片大小") @RequestParam("chunkSize") Integer chunkSize);
 
     @Configuration
     class MultipartSupportConfig {
