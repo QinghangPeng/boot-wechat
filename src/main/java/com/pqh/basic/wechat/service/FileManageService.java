@@ -6,10 +6,7 @@ import com.pqh.basic.wechat.feign.FileManageFeign;
 import com.pqh.basic.wechat.response.RestResponse;
 import com.pqh.basic.wechat.util.RedisUtil;
 import com.pqh.basic.wechat.util.RestClientHelper;
-import com.pqh.basic.wechat.vo.BigFileUploadVO;
-import com.pqh.basic.wechat.vo.FileUploadVO;
-import com.pqh.basic.wechat.vo.FileVideoVO;
-import com.pqh.basic.wechat.vo.VideoChunkVO;
+import com.pqh.basic.wechat.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +49,7 @@ public class FileManageService {
     /**
      *  文件分块支持最大size 1M
      */
-    private static final Long BLOCK_MAX_SIZE = 20971520L;
+    private static final Long BLOCK_MAX_SIZE = 1048576L;
 
     private static final String FILE_CHUNK_KEY = "file:chunk:";
 
@@ -85,7 +82,7 @@ public class FileManageService {
                 vo.setChunkCounts(bytes.length);
                 vo.setEncryptCode(code);
                 vo.setFileSuffixName("mp4");
-                vo.setFileSize(52428800L);
+                vo.setFileSize(file.getSize());
                 vo.setFileCode(fileMd5);
                 RestResponse<FileUploadVO> response = feign.createWithChunk(vo);
                 restData = RestClientHelper.getRestData(response);
@@ -231,7 +228,7 @@ public class FileManageService {
 
         //防止ios一次请求数据太多，造成内存溢出 ios比较特殊  需要特殊处理
         String browserDetails = request.getHeader("User-Agent");
-        if (browserDetails.toLowerCase().contains("safari")) {
+        if (browserDetails.toLowerCase().contains("safari") && !browserDetails.toLowerCase().contains("chrome")) {
             if (requestSize > NcccConst.LIMIT_VIDEO_SIZE){
                 end = start+NcccConst.DEFAULT_VIDEO_SIZE;
                 requestSize = end - start + 1;
@@ -333,5 +330,22 @@ public class FileManageService {
             log.error("find video error:{}",e);
         }
 
+    }
+
+    public RestResponse checkFile(MultipartFile file) {
+        try{
+            FileInfoVO vo = new FileInfoVO();
+            vo.setSysResoure("phtestvideo");
+            vo.setSysFunction("test");
+            vo.setFileName(file.getOriginalFilename());
+            vo.setFileSize(file.getSize());
+            vo.setFileCode(UUID.randomUUID().toString().replaceAll("-",""));
+            RestResponse<FileUploadVO> response = feign.checkFile(vo);
+            FileUploadVO restData = RestClientHelper.getRestData(response);
+            return RestResponse.success(restData);
+        } catch(Exception e) {
+            log.error(" error:{}",e);
+            return RestResponse.error(ServiceError.UN_KNOW_NULL);
+        }
     }
 }

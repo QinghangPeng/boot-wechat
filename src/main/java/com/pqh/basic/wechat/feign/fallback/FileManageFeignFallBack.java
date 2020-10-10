@@ -34,6 +34,11 @@ public class FileManageFeignFallBack implements FileManageFeign {
     }
 
     @Override
+    public RestResponse<FileUploadVO> checkFile(FileInfoVO vo) {
+        return null;
+    }
+
+    @Override
     public RestResponse<FileVideoVO> findVideo(String fileId, Integer chunkNum) {
         return RestResponse.error(ServiceError.SERVICE_CALL_ERROR);
     }

@@ -27,6 +27,12 @@ public class FileManageController {
     @Autowired
     private FileManageService service;
 
+    @ApiOperation("文件上传校验")
+    @PostMapping("/file_check")
+    public RestResponse uploadCheck(@RequestParam("file") MultipartFile file) {
+        return service.checkFile(file);
+    }
+
     @ApiOperation("测试文件上传(分块上传demo)")
     @PostMapping("/file_upload")
     public RestResponse upload(@RequestParam("code") String code, @RequestParam("file") MultipartFile file,

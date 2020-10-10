@@ -27,7 +27,7 @@ import javax.validation.Valid;
  * @Date: 2019/12/31 下午4:31
  * @Version: v1.0
  */
-@FeignClient(value = "nccc-basic-file-manage",/*url = "http://10.253.100.11:32365/",*/fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
+@FeignClient(value = "nccc-basic-file-manage",url = "http://10.253.100.11:32365/",fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
 @Primary
 public interface FileManageFeign {
 
@@ -39,6 +39,9 @@ public interface FileManageFeign {
 
     @PostMapping(path = "/file_manages/chunk/upload")
     RestResponse<FileUploadVO> createWithChunk(@Valid @RequestBody BigFileUploadVO bigFile);
+
+    @RequestMapping(path = "/file_manages/check",method = RequestMethod.POST)
+    RestResponse<FileUploadVO> checkFile(FileInfoVO vo);
 
     @GetMapping("/file_manages/video")
     RestResponse<FileVideoVO> findVideo(@ApiParam("文件url") @RequestParam("fileId") String fileId,

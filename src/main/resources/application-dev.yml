@@ -37,8 +37,8 @@ spring:
       client:
         enabled: true
   redis:
-    host: ${redis_host:127.0.0.1}
-    port: ${redis_port:6379}
+    host: ${redis_host:10.253.100.11}
+    port: ${redis_port:30455}
     database: ${redis_database:1}
     pool:
       max-active: 200
