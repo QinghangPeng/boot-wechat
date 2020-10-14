@@ -41,4 +41,66 @@ public class TestFeignTimeOutService {
             return RestResponse.error(ServiceError.UN_KNOW_NULL);
         }
     }
+
+
+    public static int max3(int a,int b,int c) {
+        return (a > b) ? (a > c ? a : c) : (b > c ? b : c);
+    }
+
+    public static int divideAndConquer(int[] list,int left,int right) {
+        //存放左右子问题的解
+        int maxLeftSum,maxRightSum;
+        //存放跨分界线的解
+        int maxLeftBorderSum,maxRightBorderSum;
+
+        int leftBorderSum,rightBorderSum;
+        int center,i;
+
+        //递归终止条件，子列只有一个数字
+        if (left == right) {
+            if (list[left] > 0) {
+                return list[left];
+            }
+            return 0;
+        }
+
+        //分的过程
+        center = (left + right) / 2;
+        //递归求左子列和
+        maxLeftSum = divideAndConquer(list,left,center);
+        //递归求右子列和
+        maxRightSum = divideAndConquer(list,center + 1,right);
+
+        //跨分界线的最大子列和
+        maxLeftBorderSum = 0;
+        leftBorderSum = 0;
+        for (i = center; i >= left; i--) {
+            leftBorderSum += list[i];
+            if (leftBorderSum > maxLeftBorderSum) {
+                maxLeftBorderSum = leftBorderSum;
+            }
+        }
+
+        maxRightBorderSum = 0;
+        rightBorderSum = 0;
+        for (i = center + 1; i <= right ; i++) {
+            rightBorderSum += list[i];
+            if (rightBorderSum > maxRightBorderSum) {
+                maxRightBorderSum = rightBorderSum;
+            }
+        }
+
+        //返回治的结果
+        return max3(maxLeftSum,maxRightSum,maxLeftBorderSum + maxRightBorderSum);
+    }
+
+    public static int maxSubseqSum3(int[] list, int n) {
+        return divideAndConquer(list,0, n - 1);
+    }
+
+    public static void main(String[] args) {
+        int[] list = new int[]{4,-3,5,-2,-1,2,6,-2};
+        int maxSum = maxSubseqSum3(list, list.length);
+        System.out.println(maxSum);
+    }
 }

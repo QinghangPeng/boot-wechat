@@ -27,7 +27,7 @@ import javax.validation.Valid;
  * @Date: 2019/12/31 下午4:31
  * @Version: v1.0
  */
-@FeignClient(value = "nccc-basic-file-manage",url = "http://10.253.100.11:32365/",fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
+@FeignClient(value = "nccc-basic-file-manage",url = "http://10.253.100.12:32365/",fallback = FileManageFeignFallBack.class,configuration = FileManageFeign.MultipartSupportConfig.class)
 @Primary
 public interface FileManageFeign {
 

@@ -342,6 +342,7 @@ public class FileManageService {
             vo.setFileCode(UUID.randomUUID().toString().replaceAll("-",""));
             RestResponse<FileUploadVO> response = feign.checkFile(vo);
             FileUploadVO restData = RestClientHelper.getRestData(response);
+            restData.setMd5(vo.getFileCode());
             return RestResponse.success(restData);
         } catch(Exception e) {
             log.error(" error:{}",e);

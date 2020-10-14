@@ -32,4 +32,6 @@ public class FileUploadVO {
     @ApiModelProperty("文件名字")
     private String fileName;
 
+    private String md5;
+
 }
